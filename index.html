@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.4/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body style="background-image:url(./img/plmun.jpg); background-repeat: no-repeat; background-size:cover; width: 100%; height: auto;"> 
+    <button type="submit" id="submit">Submit</button>
+    <button type="submit" id="submit"><a href="./firebase.html">Back to form</a></button>
+    <div class="container d-flex justify-content-center">
+        <div class="row col-sm-10">
+            <table class="table table-dark table-responsive">
+                <th>Key</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Course</th>
+                <th>Message</th>
+                <th>Delete</th>
+                <th>Update</th>             
+            <tbody id="mytable">
+                
+            </tbody>    
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+  import { getDatabase, ref, set, get, child, remove, update } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-database.js";
+   
+  // Paste the code from Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyCa6ImDZmdgodmTAiKlPj2RcRV0aths-Ew",
+    authDomain: "activity1-243c3.firebaseapp.com",
+    databaseURL: "https://activity1-243c3-default-rtdb.firebaseio.com",
+    projectId: "activity1-243c3",
+    storageBucket: "activity1-243c3.appspot.com",
+    messagingSenderId: "163389094781",
+    appId: "1:163389094781:web:c5fc188ca128672b96aa14",
+    measurementId: "G-PFD1YZCVVL"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+   
+  // Get a reference to the database service
+  const db = getDatabase(app);
+
+    $( "#mybtn" ).click(function() {
+        
+        const taskRef = ref(db, "users/"+ $("#t6").val());
+
+        get(taskRef).then((snapshot) => {
+        if (snapshot.exists()) {
+            $("#t1").val(snapshot.val().studno);
+            $("#t2").val(snapshot.val().username);
+            $("#t3").val(snapshot.val().email);
+            $("#t4").val(snapshot.val().message);
+            $("#t5").val(snapshot.val().course);
+            //console.log(snapshot.val());
+        } else {
+            alert("No data available");
+        }
+        }).catch((error) => {
+            alert(error);
+        });
+
+    });
+
+   
+    $( "#submit" ).click(function() {    
+     // initialise database
+        const db = getDatabase();
+
+        const tasksRef = ref(db, "users");
+
+        get(tasksRef)
+        .then((snapshot) => {
+            //const data = snapshot.val();
+            //console.log(data);
+
+            
+            var content = '';
+            //var x=1;
+            snapshot.forEach(function(data){
+                var val = data.val();
+                content +='<tr>';
+                content += '<td>' + val.studno + '</td>';
+                content += '<td>' + val.username + '</td>';
+                content += '<td>' + val.email + '</td>';
+                content += '<td>' + val.message + '</td>';
+                content += '<td>' + val.subject + '</td>';
+                content += '<td><button id="'+ val.studno +'" class="btn btn-success" value="delete">Delete</button></td>';
+                content += '<td><button id="'+ val.studno +'" class="btn btn-success" value="update">Update</button></td>';
+                content += '</tr>';
+            });
+
+            // Function to change the content of t2
+                function modifyText(event) {
+                    var studno=event.target.id;
+                    var ops=event.target.value; 
+                    //var  event.target.value);
+
+                    if (ops=="delete"){
+                        remove(ref(db, 'users/' + studno)); 
+                        //alert("Record has been removed."); 
+                    }
+
+                    if (ops=="update"){
+                        update(ref(db, 'users/' + studno),{
+                            email: 'mine@gmail.com',
+                            message: 'From update', 
+                        });
+                        //alert('updated');  
+                    }
+                }
+
+                // Add event listener to table
+                const el = document.getElementById("mytable");
+                el.addEventListener("click", modifyText, false);
+                
+            
+            //$('#mytable').append(content);
+            $("#mytable").html(content);
+        })
+        .catch((err) => {
+            console.error(err);
+        });
+
+        
+    });
+  </script>
